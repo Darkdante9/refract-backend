@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { QuoteModule } from "./quote/quote.module";
 import { PolicyModule } from "./policy/policy.module";
 import { PoolModule } from "./pool/pool.module";
@@ -18,6 +19,33 @@ import configuration, { AppConfig } from "./config/configuration";
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<AppConfig, true>) => ({
+        throttlers: [
+          {
+            name: "upstream",
+            ttl: config.get("throttle.upstream.ttl", { infer: true }),
+            limit: config.get("throttle.upstream.limit", { infer: true }),
+          },
+          {
+            name: "chain",
+            ttl: config.get("throttle.chain.ttl", { infer: true }),
+            limit: config.get("throttle.chain.limit", { infer: true }),
+          },
+          {
+            name: "default",
+            ttl: config.get("throttle.default.ttl", { infer: true }),
+            limit: config.get("throttle.default.limit", { infer: true }),
+          },
+          {
+            name: "catalog",
+            ttl: config.get("throttle.catalog.ttl", { infer: true }),
+            limit: config.get("throttle.catalog.limit", { infer: true }),
+          },
+        ],
+      }),
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -41,6 +69,10 @@ import configuration, { AppConfig } from "./config/configuration";
     {
       provide: APP_GUARD,
       useClass: ApiKeyGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
