@@ -3,6 +3,10 @@ import { APP_GUARD } from "@nestjs/core";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { ScheduleModule } from "@nestjs/schedule";
+import configuration from "./config/configuration";
+import { CacheModule } from "./cache/cache.module";
+import { HealthModule } from "./health/health.module";
 import { QuoteModule } from "./quote/quote.module";
 import { PolicyModule } from "./policy/policy.module";
 import { PoolModule } from "./pool/pool.module";
@@ -56,6 +60,10 @@ import configuration, { AppConfig } from "./config/configuration";
         synchronize: false,
       }),
     }),
+    ScheduleModule.forRoot(),
+    // CacheModule is @Global — imported once here, available everywhere.
+    CacheModule,
+    HealthModule,
     AuthModule,
     QuoteModule,
     PolicyModule,

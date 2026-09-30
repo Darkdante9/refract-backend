@@ -1,7 +1,8 @@
 {
   "name": "stellar-claim-backend",
   "version": "0.1.0",
-  "description": "Backend for Stellar claim settlement and oracle services",
+  "description": "Refract Protocol backend \u2014 oracle monitoring, claim processing, premium quoting",
+  "main": "dist/main.js",
   "private": true,
   "scripts": {
     "build": "nest build",
@@ -11,7 +12,19 @@
     "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "soroban:up": "docker compose -f test/soroban/docker-compose.yml up -d --wait",
+    "soroban:down": "docker compose -f test/soroban/docker-compose.yml down -v",
+    "soroban:bootstrap": "ts-node scripts/soroban-bootstrap.ts",
+    "test:soroban": "jest --config test/soroban/jest.soroban.config.js",
+    "regenerate:xdr-fixtures": "ts-node scripts/regenerate-xdr-fixtures.ts",
+    "test:integration": "jest --config test/integration/jest.integration.config.ts --runInBand"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
